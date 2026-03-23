@@ -28,8 +28,9 @@ export async function checkUnpartitioned(bigquery, projectId, datasets) {
     .sort((a, b) => b.total_billable_bytes - a.total_billable_bytes)
     .slice(0, 100)
     .forEach(row => {
-      const estimatedScansPerYear = 52;
-      const annualCostGBP = row.size_gb * 5.00 * estimatedScansPerYear;
+      const estimatedScansPerYear = 52; // assumes weekly full scan
+      const costPerGbScan = 5.00 / 1000; // £5 per TB = £0.005 per GB
+      const annualCostGBP = row.size_gb * costPerGbScan * estimatedScansPerYear;
 
       findings.push({
         dataset: row.dataset,
