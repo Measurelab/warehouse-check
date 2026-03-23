@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Health Report — {{projectId}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #081f30;
+            color: #e0e6ed;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+        /* -- Header -- */
+        .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #6dd750;
+            letter-spacing: -0.01em;
+        }
+        .header .meta {
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        /* -- Score strip -- */
+        .score-strip {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem 2rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .score-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .score-number.green { color: #6dd750; }
+        .score-number.amber { color: #ffd700; }
+        .score-number.red { color: #ff6b6b; }
+        .score-detail {
+            flex: 1;
+        }
+        .score-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.5;
+            margin-bottom: 0.25rem;
+        }
+        .score-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .score-bar-fill.green { background: #6dd750; }
+        .score-bar-fill.amber { background: #ffd700; }
+        .score-bar-fill.red { background: #ff6b6b; }
+
+        /* -- Narrative -- */
+        .narrative {
+            margin-bottom: 3rem;
+            padding: 1.5rem 2rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border-left: 3px solid #6dd750;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #c8d1db;
+        }
+
+        /* -- Section headings -- */
+        .section-heading {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.4;
+            margin-bottom: 1rem;
+        }
+
+        /* -- Issue cards (red/amber) -- */
+        .issues { margin-bottom: 3rem; }
+        .issue-card {
+            margin-bottom: 1.25rem;
+            padding: 1.25rem 1.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border-left: 3px solid;
+        }
+        .issue-card.red { border-left-color: #ff6b6b; }
+        .issue-card.amber { border-left-color: #ffd700; }
+
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .issue-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .issue-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .issue-badge.red { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+        .issue-badge.amber { background: rgba(255,215,0,0.15); color: #ffd700; }
+
+        .issue-stat {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 0.75rem;
+        }
+        .issue-stat strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .issue-findings {
+            list-style: none;
+            padding: 0;
+        }
+        .issue-findings li {
+            padding: 0.4rem 0.75rem;
+            margin-bottom: 0.35rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.75rem;
+            color: #9aa8b8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .issue-more {
+            font-size: 0.75rem;
+            opacity: 0.4;
+            margin-top: 0.5rem;
+        }
+
+        /* -- Passing checks (green) -- */
+        .passing { margin-bottom: 3rem; }
+        .passing-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .passing-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            background: rgba(109,215,80,0.06);
+            border: 1px solid rgba(109,215,80,0.12);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #6dd750;
+        }
+        .passing-item .tick {
+            font-size: 0.85rem;
+        }
+
+        /* -- Skipped checks -- */
+        .skipped-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+        }
+        .skipped-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* -- CTA -- */
+        .cta {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(109,215,80,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(109,215,80,0.15);
+        }
+        .cta h3 {
+            color: #6dd750;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .cta p {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #6dd750;
+            color: #081f30;
+            padding: 0.65rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .cta-button:hover { background: #5bb83f; }
+
+        /* -- Footer -- */
+        .footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.75rem;
+            opacity: 0.35;
+        }
+        .footer a { color: #6dd750; text-decoration: none; }
+
+        @media print {
+            body { background: #fff; color: #222; }
+            .score-number.green, .score-number.amber, .score-number.red { color: #222; }
+            .issue-card, .narrative, .score-strip, .cta { background: #f8f8f8; border: 1px solid #ddd; }
+            .passing-item { background: #f0f8ee; border-color: #ccc; color: #333; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Warehouse Health Report</h1>
+            <span class="meta">{{projectId}} · {{timestamp}}</span>
+        </div>
+
+        <div class="score-strip">
+            <div class="score-number {{overallStatusLower}}">{{overallScore}}</div>
+            <div class="score-detail">
+                <div class="score-label">Health score out of 100</div>
+                <div class="score-bar">
+                    <div class="score-bar-fill {{overallStatusLower}}" style="width: {{overallScore}}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="narrative">{{narrative}}</div>
+
+        {{issuesSection}}
+
+        {{passingSection}}
+
+        {{skippedSection}}
+
+        <div class="cta">
+            <h3>Want expert help?</h3>
+            <p>Our data engineering team can help implement these recommendations and build automated monitoring.</p>
+            <a href="mailto:hello@measurelab.co.uk?subject=Warehouse Health Review — {{projectId}}" class="cta-button">
+                Get expert review
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Generated by @measurelab/warehouse-check · Your data never left your machine · <a href="https://measurelab.co.uk">measurelab.co.uk</a></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+warehouse-health-report.html
+*.html
+!templates/*.html
+.DS_Store

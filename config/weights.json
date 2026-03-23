@@ -1,0 +1,13 @@
+{
+  "stale_tables": 0.08,
+  "null_columns": 0.09,
+  "unpartitioned": 0.09,
+  "documentation": 0.12,
+  "duplicates": 0.07,
+  "orphaned_views": 0.07,
+  "primary_keys": 0.12,
+  "schema_drift": 0.09,
+  "cost_hotspots": 0.12,
+  "external_consumers": 0.09,
+  "___note": "weights are normalised at runtime — sum need not equal 1.00 but currently does"
+}

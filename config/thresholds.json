@@ -1,0 +1,12 @@
+{
+  "stale_tables": { "green": [0, 5], "amber": [6, 15], "red": [16, 999] },
+  "null_columns": { "green": [0, 10], "amber": [11, 30], "red": [31, 999] },
+  "unpartitioned": { "green": [0, 1], "amber": [2, 4], "red": [5, 999] },
+  "documentation": { "green_pct": 80, "amber_pct": 50 },
+  "duplicates": { "green": [0, 1], "amber": [2, 4], "red": [5, 999] },
+  "orphaned_views": { "green": [0, 3], "amber": [4, 10], "red": [11, 999] },
+  "primary_keys": { "green": [0, 2], "amber": [3, 5], "red": [6, 999] },
+  "schema_drift": { "green": [0, 2], "amber": [3, 5], "red": [6, 999] },
+  "cost_hotspots": { "green": [0, 100], "amber": [101, 500], "red": [501, 99999] },
+  "external_consumers": { "green": [0, 2], "amber": [3, 6], "red": [7, 999] }
+}
