@@ -16,7 +16,7 @@ export async function checkCostHotspots(bigquery, projectId, datasets) {
             total_bytes_processed,
             total_slot_ms,
             creation_time,
-            ROUND(total_bytes_processed / POW(1024, 4) * 5.00, 2) as estimated_cost_gbp
+            ROUND(total_bytes_processed / 1e12 * 5.00, 2) as estimated_cost_gbp
           FROM \`${projectId}.region-${region}.INFORMATION_SCHEMA.JOBS_BY_PROJECT\`
           WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
             AND job_type = 'QUERY'
