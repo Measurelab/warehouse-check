@@ -22,9 +22,10 @@ export async function checkDocumentation(bigquery, projectId, datasets) {
     documented.add(`${row.dataset}.${row.table_name}`);
   });
 
-  // Check which tables lack documentation
+  // Check which tables lack documentation (exclude date-sharded tables)
+  const dateShardPattern = /^(.+)_\d{8}$/;
   allTables
-    .filter(row => row.total_billable_bytes > 0 && row.table_type !== 'VIEW')
+    .filter(row => row.total_billable_bytes > 0 && row.table_type !== 'VIEW' && !dateShardPattern.test(row.table_name))
     .forEach(row => {
       const tableKey = `${row.dataset}.${row.table_name}`;
       const hasDescription = documented.has(tableKey);

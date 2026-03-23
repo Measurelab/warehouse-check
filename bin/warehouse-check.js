@@ -22,9 +22,19 @@ ${pkg.name} v${pkg.version}
 ${pkg.description}
 
 Usage:
-  warehouse-check              Run interactive warehouse health check
-  warehouse-check --help       Show this help
-  warehouse-check --version    Show version
+  warehouse-check                          Interactive mode
+  warehouse-check --project my-project     Scan a specific project
+  warehouse-check --project p --dataset d  Scan specific dataset(s)
+  warehouse-check --quiet                  Score only, no interactive prompts
+  warehouse-check --json                   Output results as JSON
+
+Options:
+  --project, -p    Google Cloud project ID
+  --dataset, -d    Dataset to scan (comma-separated, or repeat flag)
+  --quiet, -q      Minimal output — just the score
+  --json           Output full results as JSON (implies --quiet)
+  --help, -h       Show this help
+  --version, -v    Show version
 
 Prerequisites:
   gcloud auth application-default login
@@ -38,4 +48,34 @@ More info: https://github.com/Measurelab/warehouse-check
   process.exit(0);
 }
 
-run();
+// Parse flags
+function getFlag(names) {
+  for (const name of names) {
+    const idx = args.indexOf(name);
+    if (idx !== -1 && idx + 1 < args.length) return args[idx + 1];
+  }
+  return null;
+}
+
+function hasFlag(names) {
+  return names.some(n => args.includes(n));
+}
+
+const options = {
+  project: getFlag(['--project', '-p']),
+  dataset: getFlag(['--dataset', '-d']),
+  quiet: hasFlag(['--quiet', '-q']),
+  json: hasFlag(['--json']),
+};
+
+// --json implies --quiet
+if (options.json) options.quiet = true;
+
+// Parse comma-separated datasets
+if (options.dataset) {
+  options.datasets = options.dataset.split(',').map(d => d.trim());
+} else {
+  options.datasets = null;
+}
+
+run(options);
