@@ -27,11 +27,16 @@ export function generateNarrative(results) {
     }
   }
 
-  // Unpartitioned — quote cost
+  // Unpartitioned — quote size, only mention cost if meaningful
   if (cat.unpartitioned && cat.unpartitioned.score < 50) {
     const n = cat.unpartitioned.findings.length;
+    const totalGb = cat.unpartitioned.findings.reduce((s, f) => s + (f.sizeGb || 0), 0);
     const totalCost = cat.unpartitioned.findings.reduce((s, f) => s + (f.estimatedAnnualCostGBP || 0), 0);
-    lines.push(`${n} large tables lack partitioning — that's an estimated £${totalCost.toLocaleString()} per year in avoidable scan costs.`);
+    if (totalCost > 1000) {
+      lines.push(`${n} large tables (${totalGb.toFixed(0)} GB) lack partitioning, costing an estimated £${totalCost.toLocaleString()}/year in avoidable full-table scans.`);
+    } else {
+      lines.push(`${n} large tables (${totalGb.toFixed(0)} GB) lack partitioning — every query against them triggers a full-table scan.`);
+    }
   }
 
   // Documentation — quote percentage
@@ -93,7 +98,7 @@ export function generateNarrative(results) {
 
   // Closing recommendation
   if (overallScore < 50) {
-    lines.push('We\'d recommend starting with partitioning the largest tables and establishing primary keys — the cost savings alone typically justify the effort.');
+    lines.push('We\'d recommend starting with documentation and removing dead tables, then partitioning the largest active tables and establishing primary key constraints.');
   } else if (overallScore < 75) {
     lines.push('Focus on documentation and removing stale objects to improve maintainability.');
   } else {
